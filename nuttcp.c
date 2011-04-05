@@ -2990,11 +2990,13 @@ main( int argc, char **argv )
 		fflush(stderr);
 		exit(1);
 	}
+#ifndef UDP_FLIP
 	if (reverse && udp) {
 		fprintf(stderr, "flip option not supported for UDP\n");
 		fflush(stderr);
 		exit(1);
 	}
+#endif
 	if (traceroute) {
 		nstream = 1;
 		if (!clientserver) {
@@ -4200,7 +4202,7 @@ doit:
 
 		if (multilink && !client &&
 		    ((trans && !reverse) || (!trans && reverse)) &&
-		    !udp && (stream_idx == 1)) {
+		    (stream_idx == 1)) {
 			nameinfo_flags = NI_NAMEREQD;
 			if (getnameinfo((struct sockaddr *)&client_ipaddr,
 						sizeof(struct in6_addr),
@@ -5116,6 +5118,43 @@ acceptnewconn:
 			}
 		    }
 		}
+#ifdef UDP_FLIP
+		else if (udp && reverse && (stream_idx > 0)) {
+			/* UDP/flip mode: receiver sends first datagrams on data channel, useful for receivers behind NAT */
+			if (!trans) {
+				int i = 10;
+
+				while (i--) {
+					if (af == AF_INET)
+						sendto(fd[stream_idx], "CONN", 4, 0, (struct sockaddr *)&sinhim[stream_idx], sizeof(sinhim[stream_idx]));
+#ifdef AF_INET6
+					else if (af == AF_INET6)
+						sendto(fd[stream_idx], "CONN", 4, 0, (struct sockaddr *)&sinhim6[stream_idx], sizeof(sinhim6[stream_idx]));
+#endif
+				}
+			} else {
+				char buf[4];
+				socklen_t len;
+
+				if (af == AF_INET) {
+					len = sizeof(sinhim[stream_idx]);
+					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim[stream_idx], &len) != sizeof(buf) ||
+					    len != sizeof(sinhim[stream_idx]))
+						err("error while establishing UDP data channel");
+				}
+#ifdef AF_INET6
+				else if (af == AF_INET6) {
+					len = sizeof(sinhim6[stream_idx]);
+					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim6[stream_idx], &len) != sizeof(buf) ||
+					    len != sizeof(sinhim6[stream_idx]))
+						err("error while establishing UDP data channel");
+				}
+#endif
+				if (strncmp(buf, "CONN", 4))
+					err("unexpected data in UDP CONN packet");
+			}
+		}
+#endif
 		if (!udp && trans && (stream_idx >= 1) && (retransinfo > 0)) {
 			nretrans[stream_idx] = get_retrans(fd[stream_idx]);
 			iretrans[stream_idx] = nretrans[stream_idx];
