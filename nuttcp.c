@@ -1,5 +1,5 @@
 /*
- *	N U T T C P . C						v7.1.3
+ *	N A T T C P . C						v7.1.4
  *
  * Copyright(c) 2000 - 2010 Bill Fink.  All rights reserved.
  * Copyright(c) 2003 - 2010 Rob Scott.  All rights reserved.
@@ -814,7 +814,7 @@ void print_tcpinfo();
 
 int vers_major = 7;
 int vers_minor = 1;
-int vers_delta = 3;
+int vers_delta = 4;
 int ivers;
 int rvers_major = 0;
 int rvers_minor = 0;
@@ -1065,11 +1065,11 @@ struct hostent *addr;
 extern int errno;
 
 const char Usage[] = "\
-Usage: nuttcp or nuttcp -h	prints this usage info\n\
-Usage: nuttcp -V		prints version info\n\
-Usage: nuttcp -xt [-m] host	forward and reverse traceroute to/from server\n\
-Usage (transmitter): nuttcp [-t] [-options] [ctl_addr/]host [3rd-party] [<in]\n\
-      |(receiver):   nuttcp -r [-options] [host] [3rd-party] [>out]\n\
+Usage: nattcp or nattcp -h	prints this usage info\n\
+Usage: nattcp -V		prints version info\n\
+Usage: nattcp -xt [-m] host	forward and reverse traceroute to/from server\n\
+Usage (transmitter): nattcp [-t] [-options] [ctl_addr/]host [3rd-party] [<in]\n\
+      |(receiver):   nattcp -r [-options] [host] [3rd-party] [>out]\n\
 	-4	Use IPv4\n"
 #ifdef AF_INET6
 "	-6	Use IPv6\n"
@@ -1099,16 +1099,16 @@ Usage (transmitter): nuttcp [-t] [-options] [ctl_addr/]host [3rd-party] [<in]\n\
 	-j	enable jitter measurements (assumes -u and -Ri options)\n\
 	-o	enable one-way delay reports (needs synchronized clocks)\n\
 	-i##	receiver interval reporting in seconds (or (m|M)inutes)\n\
-	-Ixxx	identifier for nuttcp output (max of 40 characters)\n\
+	-Ixxx	identifier for nattcp output (max of 40 characters)\n\
 	-F	flip option to reverse direction of data connection open\n\
 	-a	retry failed server connection \"again\" for transient errors\n"
 #ifdef HAVE_SETPRIO
-"	-xP##	set nuttcp process priority (must be root)\n"
+"	-xP##	set nattcp process priority (must be root)\n"
 #endif
 #ifdef HAVE_SETAFFINITY
-"	-xc##	set nuttcp client process CPU affinity\n"
-"	-xcs##	set nuttcp server process CPU affinity\n"
-"	-xc#/#	set nuttcp client/server process CPU affinity\n"
+"	-xc##	set nattcp client process CPU affinity\n"
+"	-xcs##	set nattcp server process CPU affinity\n"
+"	-xc#/#	set nattcp client/server process CPU affinity\n"
 #endif
 "	-d	set TCP SO_DEBUG option on data socket\n\
 	-v[v]	verbose [or very verbose] output\n\
@@ -1124,7 +1124,7 @@ Usage (transmitter): nuttcp [-t] [-options] [ctl_addr/]host [3rd-party] [<in]\n\
 "	--enable-v4-mapped enable v4 mapping in v6 server\n"
 #endif
 "\n\
-Usage (server): nuttcp -S[P] [-options]\n\
+Usage (server): nattcp -S[P] [-options]\n\
 		note server mode excludes use of -s except for -1 one-shot mode\n\
 		'P' suboption makes 3rd party {in,out}bound control ports same\n\
 	-4	Use IPv4 (default)\n"
@@ -1141,10 +1141,10 @@ Usage (server): nuttcp -S[P] [-options]\n\
 "	-P##	port number for server connection (default 5000)\n\
 		note don't use with inetd/xinetd (use services file instead)\n"
 #ifdef HAVE_SETPRIO
-"	-xP##	set nuttcp process priority (must be root)\n"
+"	-xP##	set nattcp process priority (must be root)\n"
 #endif
 #ifdef HAVE_SETAFFINITY
-"	-xc##	set nuttcp server process CPU affinity\n"
+"	-xc##	set nattcp server process CPU affinity\n"
 #endif
 "	--idle-data-timeout <value|minimum/default/maximum>  (default: 15/30/60)\n"
 "		     server timeout in seconds for idle data connection\n"
@@ -1157,10 +1157,10 @@ Usage (server): nuttcp -S[P] [-options]\n\
 #endif
 "\n\
 Multilink aggregation options (TCP only):\n\
-         nuttcp [-options] -N##  [ctl_addr]/host1/host2/.../host## (xmit only)\n\
-         nuttcp [-options] -N##  [ctl_addr/]host+addr_stride (IPv4 only)\n\
-         nuttcp [-options] -N##  [ctl_addr/]host+n.n.n.n (IPv4 only)\n\
-         nuttcp [-options] -N##m [ctl_addr/]host\n\
+         nattcp [-options] -N##  [ctl_addr]/host1/host2/.../host## (xmit only)\n\
+         nattcp [-options] -N##  [ctl_addr/]host+addr_stride (IPv4 only)\n\
+         nattcp [-options] -N##  [ctl_addr/]host+n.n.n.n (IPv4 only)\n\
+         nattcp [-options] -N##m [ctl_addr/]host\n\
                                  where host resolves to multiple addresses\n\
 \n\
                         separate [ctl_addr/] option available only for xmit\n\
@@ -2133,7 +2133,7 @@ main( int argc, char **argv )
 			verbose = 1;
 			break;
 		case 'V':
-			fprintf(stdout, "nuttcp-%d.%d.%d%s\n", vers_major,
+			fprintf(stdout, "nattcp-%d.%d.%d%s\n", vers_major,
 					vers_minor, vers_delta,
 					beta ? BETA_STR : "");
 			exit(0);
