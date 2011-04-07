@@ -23,3 +23,7 @@ udp-climber : udp-climber.lua
 
 clean:
 	rm -f *.o $(MANIFEST)
+
+# Win32 binary release
+release.zip : $(MANIFEST) cyggcc_s-1.dll cygwin1.dll lua.exe lua5.1.dll
+	zip $@ $^
