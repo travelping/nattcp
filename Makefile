@@ -1,3 +1,5 @@
+VERSION := 7.1.4
+
 CC := gcc
 CFLAGS := -Wall -O3
 CPPFLAGS += -DUDP_FLIP
@@ -25,5 +27,10 @@ clean:
 	rm -f *.o $(MANIFEST)
 
 # Win32 binary release
-release.zip : $(MANIFEST) cyggcc_s-1.dll cygwin1.dll lua.exe lua5.1.dll
-	zip $@ $^
+release : $(MANIFEST) cyggcc_s-1.dll cygwin1.dll lua.exe lua5.1.dll
+	rm -f nattcp-$(VERSION)-win32.zip
+	zip nattcp-$(VERSION)-win32.zip $^
+
+# automake-style source distro
+dist : Makefile nattcp.c udp-climber.lua nuttcp.8 LICENSE
+	tar czf nattcp-$(VERSION).tar.gz --xform "s,^,nattcp-$(VERSION)/,S" $^
