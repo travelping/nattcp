@@ -8631,7 +8631,7 @@ getoptvalp( char **argv, int index, int reqval, int *skiparg )
 #define NETSTAT			"netstat"
 
 #if defined(linux)
-#define RETRANS			"segments retransmited"
+#define RETRANS			"segments retransmitted"
 #define NETSTAT_DIR		"/bin/"
 #define NRETRANS_BEFORE
 #elif defined(__FreeBSD__)
