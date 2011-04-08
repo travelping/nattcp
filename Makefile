@@ -12,6 +12,8 @@ LUACFLAGS := -s
 #EXEEXT := .exe
 
 MANIFEST := nattcp$(EXEEXT) udp-climber
+DIST := Makefile nattcp.c udp-climber.lua nuttcp.8 LICENSE \
+	xinetd.d/nattcp xinetd.d/nattcp4 xinetd.d/nattcp6
 
 all : $(MANIFEST)
 
@@ -37,5 +39,5 @@ release : $(MANIFEST) cyggcc_s-1.dll cygwin1.dll lua.exe lua5.1.dll
 	zip nattcp-$(VERSION)-win32.zip $^
 
 # automake-style source distro
-dist : Makefile nattcp.c udp-climber.lua nuttcp.8 LICENSE
+dist : $(DIST)
 	tar czf nattcp-$(VERSION).tar.gz --xform "s,^,nattcp-$(VERSION)/,S" $^
