@@ -23,6 +23,11 @@ udp-climber : udp-climber.lua
 	$(LUAC) $(LUACFLAGS) -o - $< >>$@
 	chmod +x $@
 
+install : $(MANIFEST)
+	mkdir -p $(DESTDIR)/usr/bin
+	install -m 0755 nattcp $(DESTDIR)/usr/bin/
+	install -m 0755 udp-climber $(DESTDIR)/usr/bin/
+
 clean:
 	rm -f *.o $(MANIFEST)
 
