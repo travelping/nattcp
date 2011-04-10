@@ -1,0 +1,25 @@
+This package was debianized by Robin Haberkorn <robin.haberkorn@googlemail.com> on
+Thu, 07 Apr 2011 22:55:00 -0800.
+
+Upstream Authors:	Robin Haberkorn <robin.haberkorn@googlemail.com>
+			Bill Fink <billfink@mindspring.com>
+			Rob Scott <rob@hpcmo.hpc.mil>
+
+Copyright: © 2011 Robin Haberkorn
+	   © 2000-2006 Bill Fink
+	   © 2003-2006 Rob Scott
+License:
+
+    nattcp is free, opensource software.  You can redistribute it and/or
+    modify it under the terms of Version 2 of the GNU General Public
+    License (GPL), as published by the GNU Project (http://www.gnu.org).
+    A copy of the license can also be found in the LICENSE file.
+
+    This program is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General Public License
+    for more details.
+
+On Debian systems, the complete text of the GNU General Public License Version 2
+can be found in the file `/usr/share/common-licenses/GPL-2'.
+

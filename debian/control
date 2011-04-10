@@ -1,0 +1,19 @@
+Source: nattcp
+Section: net
+Priority: extra
+Maintainer: Robin Haberkorn <robin.haberkorn@googlemail.com>
+Build-Depends: debhelper (>= 7), lua5.1
+Standards-Version: 3.9.1
+
+Package: nattcp
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, lua5.1
+Description: network performance measurement tool
+ nattcp is a network performance measurement tool intended for use by network
+ and system managers. Its most basic usage is to determine the raw TCP (or UDP)
+ network layer throughput by transferring memory buffers from a source system
+ across an interconnecting network to a destination system, either transferring
+ data for a specified time interval, or alternatively transferring a specified
+ number of bytes.
+ It is a fork of nuttcp, initially to be better suited in environments
+ where the client is behind a NAT gateway.

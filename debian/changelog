@@ -1,0 +1,5 @@
+nattcp (7.1.4-1ppa1~maverick1) maverick; urgency=low
+
+  * initial debian package based on nuttcp (6.1.2-3)
+
+ -- Robin Haberkorn <robin.haberkorn@googlemail.com>  Sun, 10 Apr 2011 23:03:31 +0200
