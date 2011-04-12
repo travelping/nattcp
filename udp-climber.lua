@@ -87,15 +87,15 @@ local function test()
 		end
 
 		printf("%d: rx rate = %fmbps, loss = %d%%\n", i,
-		       results.rate_Mbps, results.data_loss*100)
+		       results.rate_Mbps, results.data_loss)
 
 		if results.rate_Mbps <= prev_results.rate_Mbps or
-		   results.data_loss > 0.1 then
+		   results.data_loss > 10.0 then
 			printf("Receive rate does no longer increase or there are excessive drops.\n"..
 			       "Best result was: %fmbps/%fkbps/%dkibits.\n",
 			       prev_results.rate_Mbps,
 			       prev_results.rate_Mbps*1000,
-			       prev_results.rate_Mbps*1000/1024)
+			       prev_results.rate_Mbps*1000*1000/1024)
 			os.exit(0)
 		end
 
