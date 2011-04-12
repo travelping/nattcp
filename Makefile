@@ -2,7 +2,7 @@ VERSION := 7.1.4
 
 CC := gcc
 CFLAGS := -Wall -O3
-CPPFLAGS += -DUDP_FLIP
+override CPPFLAGS += -DUDP_FLIP
 
 LUAC := luac
 LUACFLAGS := -s
