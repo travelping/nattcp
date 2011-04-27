@@ -1,8 +1,10 @@
 VERSION := 7.1.4
 
 CC := gcc
-CFLAGS := -Wall -O3
-override CPPFLAGS += -DUDP_FLIP
+CFLAGS := -Wall -O0 -g
+
+override CPPFLAGS += -DUDP_FLIP -DSSL_AUTH
+override LDFLAGS += -lpolarssl
 
 LUAC := luac
 LUACFLAGS := -s
@@ -12,13 +14,13 @@ LUACFLAGS := -s
 #EXEEXT := .exe
 
 MANIFEST := nattcp$(EXEEXT) udp-climber
-DIST := Makefile nattcp.c udp-climber.lua nuttcp.8 LICENSE \
+DIST := Makefile nattcp.c polarssl.c udp-climber.lua nuttcp.8 LICENSE \
 	xinetd.d/nattcp xinetd.d/nattcp4 xinetd.d/nattcp6
 
 all : $(MANIFEST)
 
-nattcp$(EXEEXT) : nattcp.c
-	$(CC) $(CFLAGS) $(CPPFLAGS) $(LDFLAGS) -o $@ $<
+nattcp$(EXEEXT) : nattcp.o polarssl.o
+	$(CC) $(LDFLAGS) -o $@ $^
 
 udp-climber : udp-climber.lua
 	echo "#!/usr/bin/lua" >$@

@@ -812,6 +812,14 @@ int get_retrans( int sockfd );
 void print_tcpinfo();
 #endif
 
+#ifdef SSL_AUTH
+/*
+ * SSL handshake interface, provided by library-specific compilation units
+ */
+int ctl_init_ssl_client(int, const char *, const char *, const char *);
+int ctl_init_ssl_server(int, const char *, const char *, const char *);
+#endif
+
 int vers_major = 7;
 int vers_minor = 1;
 int vers_delta = 4;
@@ -4890,6 +4898,15 @@ doit:
 				}
 				fprintf(stdout, "\n");
 			}
+
+#ifdef SSL_AUTH
+			if (stream_idx == 0) {
+				if (ctl_init_ssl_client(fd[stream_idx], "clntcert.pem", "clntkey.pem", "nattcp")) {
+					errno = 0;
+					err("SSL initialization or handshake failed");
+				}
+			}
+#endif
 		    } else {
 			/* The receiver listens for the connection
 			 * (unless reversed by the flip option)
@@ -5116,6 +5133,18 @@ acceptnewconn:
 			else {
 			    err("unsupported AF");
 			}
+
+#ifdef SSL_AUTH
+			if (stream_idx == 0) {
+				/* NOTE: we're in the process dedicated to handling
+				 * the accepted connection (server)
+				 */
+				if (ctl_init_ssl_server(fd[stream_idx], "srvcert.pem", "srvkey.pem", "nattcp")) {
+					errno = 0;
+					err("SSL initialization or handshake failed");
+				}
+			}
+#endif
 		    }
 		}
 #ifdef UDP_FLIP
@@ -5139,19 +5168,25 @@ acceptnewconn:
 				if (af == AF_INET) {
 					len = sizeof(sinhim[stream_idx]);
 					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim[stream_idx], &len) != sizeof(buf) ||
-					    len != sizeof(sinhim[stream_idx]))
+					    len != sizeof(sinhim[stream_idx])) {
+						errno = 0;
 						err("error while establishing UDP data channel");
+					}
 				}
 #ifdef AF_INET6
 				else if (af == AF_INET6) {
 					len = sizeof(sinhim6[stream_idx]);
 					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim6[stream_idx], &len) != sizeof(buf) ||
-					    len != sizeof(sinhim6[stream_idx]))
+					    len != sizeof(sinhim6[stream_idx])) {
+						errno = 0;
 						err("error while establishing UDP data channel");
+					}
 				}
 #endif
-				if (strncmp(buf, "CONN", 4))
+				if (strncmp(buf, "CONN", 4)) {
+					errno = 0;
 					err("unexpected data in UDP CONN packet");
+				}
 			}
 		}
 #endif
