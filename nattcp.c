@@ -5121,6 +5121,10 @@ acceptnewconn:
 				client_ipaddr.ss.ss_family = AF_INET;
 				client_ipaddr.sin.sin_addr = clientaddr;
 			    }
+			    else if (memcmp(&peer.sin_addr, &sinhim[0].sin_addr, sizeof(struct in_addr))) {
+			    	errno = 0;
+			    	err("invalid data channel peer address: possible man-in-the-middle attack");
+			    }
 			}
 #ifdef AF_INET6
 			else if (af == AF_INET6) {
@@ -5162,6 +5166,10 @@ acceptnewconn:
 				client_ipaddr.ss.ss_family = AF_INET6;
 				client_ipaddr.sin6.sin6_addr = clientaddr6;
 			    }
+			    else if (memcmp(&peer.sin6_addr, &sinhim6[0].sin6_addr, sizeof(struct in6_addr))) {
+			    	errno = 0;
+			    	err("invalid data channel peer address: possible man-in-the-middle attack");
+			    }
 			}
 #endif
 			else {
@@ -5187,28 +5195,43 @@ acceptnewconn:
 
 				while (i--) {
 					if (af == AF_INET)
-						sendto(fd[stream_idx], "CONN", 4, 0, (struct sockaddr *)&sinhim[stream_idx], sizeof(sinhim[stream_idx]));
+						sendto(fd[stream_idx], "CONN", 4, 0,
+						       (struct sockaddr *)&sinhim[stream_idx], sizeof(sinhim[stream_idx]));
 #ifdef AF_INET6
 					else if (af == AF_INET6)
-						sendto(fd[stream_idx], "CONN", 4, 0, (struct sockaddr *)&sinhim6[stream_idx], sizeof(sinhim6[stream_idx]));
+						sendto(fd[stream_idx], "CONN", 4, 0,
+						       (struct sockaddr *)&sinhim6[stream_idx], sizeof(sinhim6[stream_idx]));
 #endif
 				}
 			} else {
 				char buf[4];
-				socklen_t len;
+				socklen_t addrlen;
 
+				/* FIXME: recvfrom timeout; error handling? */
 				if (af == AF_INET) {
-					len = sizeof(sinhim[stream_idx]);
-					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim[stream_idx], &len) != sizeof(buf) ||
-					    len != sizeof(sinhim[stream_idx]))
-						err("error while establishing UDP data channel");
+					addrlen = sizeof(sinhim[stream_idx]);
+					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0,
+					    (struct sockaddr *)&sinhim[stream_idx], &addrlen) < 0)
+						err("error establishing UDP data channel");
+
+					if (addrlen != sizeof(sinhim[stream_idx]) ||
+					    memcmp(&sinhim[stream_idx].sin_addr, &sinhim[0].sin_addr, sizeof(struct in_addr))) {
+						errno = 0;
+						err("invalid UDP data channel receiver address: possible man-in-the-middle attack");
+					}
 				}
 #ifdef AF_INET6
 				else if (af == AF_INET6) {
-					len = sizeof(sinhim6[stream_idx]);
-					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim6[stream_idx], &len) != sizeof(buf) ||
-					    len != sizeof(sinhim6[stream_idx]))
-						err("error while establishing UDP data channel");
+					addrlen = sizeof(sinhim6[stream_idx]);
+					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0,
+					    (struct sockaddr *)&sinhim6[stream_idx], &addrlen) < 0)
+						err("error establishing UDP data channel");
+
+					if (addrlen != sizeof(sinhim6[stream_idx]) ||
+					    memcmp(&sinhim6[stream_idx].sin6_addr, &sinhim6[0].sin6_addr, sizeof(struct in6_addr))) {
+						errno = 0;
+						err("invalid UDP data channel receiver address: possible man-in-the-middle attack");
+					}
 				}
 #endif
 				if (strncmp(buf, "CONN", 4)) {
