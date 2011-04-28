@@ -818,6 +818,13 @@ void print_tcpinfo();
  */
 int ctl_init_ssl_client(int, const char *, const char *, const char *);
 int ctl_init_ssl_server(int, const char *, const char *, const char *);
+
+#define DEFAULT_SSL_CERT	"cert.pem"
+#define DEFAULT_SSL_KEY		"key.pem"
+
+int ssl_enabled = 0;
+const char *ssl_cert = DEFAULT_SSL_CERT;
+const char *ssl_key = DEFAULT_SSL_KEY;
 #endif
 
 int vers_major = 7;
@@ -1181,8 +1188,20 @@ Format options:\n\
 	-f-percentloss	don't give %%loss info on brief output (UDP)\n\
 	-fparse		generate key=value parsable output\n\
 	-f-beta		suppress beta version message\n\
-	-f-rtt		suppress RTT info \n\
-";
+	-f-rtt		suppress RTT info \n"
+#ifdef SSL_AUTH
+"\n"
+"SSL options:\n"
+"	--ssl		Enforce SSL authentication of the control channel\n"
+"	--ssl-cert <certificate>  (default: " DEFAULT_SSL_CERT ")\n"
+"			PEM-encoded client/server certificate chain. The included\n"
+"			CA-chain will also be used to authenticate the peer certificate.\n"
+"			Implies --ssl\n"
+"	--ssl-key <key>  (default: " DEFAULT_SSL_KEY ")\n"
+"			PEM/DER-encoded RSA private key. It must not be password-encrypted.\n"
+"			Implies --ssl\n"
+#endif
+;
 
 char stats[128];
 char srvrbuf[4096];
@@ -2417,6 +2436,23 @@ main( int argc, char **argv )
 			}
 			else if (strcmp(&argv[0][2], "enable-v4-mapped") == 0) {
 				v4mapped=1;
+			}
+#endif
+#ifdef SSL_AUTH
+			else if (strcmp(&argv[0][2], "ssl") == 0) {
+				ssl_enabled = 1;
+			}
+			else if (strcmp(&argv[0][2], "ssl-cert") == 0) {
+				ssl_enabled = 1;
+				ssl_cert = argv[1];
+				argv++;
+				argc--;
+			}
+			else if (strcmp(&argv[0][2], "ssl-key") == 0) {
+				ssl_enabled = 1;
+				ssl_key = argv[1];
+				argv++;
+				argc--;
 			}
 #endif
 			else {
@@ -4900,8 +4936,8 @@ doit:
 			}
 
 #ifdef SSL_AUTH
-			if (stream_idx == 0) {
-				if (ctl_init_ssl_client(fd[stream_idx], "clntcert.pem", "clntkey.pem", "nattcp"))
+			if (stream_idx == 0 && ssl_enabled) {
+				if (ctl_init_ssl_client(fd[stream_idx], ssl_cert, ssl_key, NULL))
 					exit(1);
 			}
 #endif
@@ -5133,11 +5169,11 @@ acceptnewconn:
 			}
 
 #ifdef SSL_AUTH
-			if (stream_idx == 0) {
+			if (stream_idx == 0 && ssl_enabled) {
 				/* NOTE: we're in the process dedicated to handling
 				 * the accepted connection (server)
 				 */
-				if (ctl_init_ssl_server(fd[stream_idx], "srvcert.pem", "srvkey.pem", "nattcp"))
+				if (ctl_init_ssl_server(fd[stream_idx], ssl_cert, ssl_key, NULL))
 					exit(1);
 			}
 #endif

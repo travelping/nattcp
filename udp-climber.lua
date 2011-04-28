@@ -16,6 +16,8 @@ options:
 	-t <rate>	Rate in kbps that will not be exceeded (default: 20000)
 	-s <rate>	Rate in kbps to increase in each step (default: 50)
 	-T <time>	Transmit time in seconds for each test (default: 10)
+	--ssl		SSL authenticate nattcp client with cert.pem/key.pem (default)
+	--no-ssl	Do not attempt to do any SSL authentication
 The NATTCP environment variable specifies the nattcp binary to use (default: "nattcp").
 ]=], arg[0])
 	os.exit(r or 1) -- unsuccessful by default
@@ -24,6 +26,7 @@ end
 -- defaults
 local binary = os.getenv("NATTCP") or "nattcp"
 local downstream = true
+local ssl_params = "--ssl"
 
 local time = 10 -- seconds
 local start_rate = 500 -- kbps
@@ -55,6 +58,8 @@ while i < #arg-1 do
 		i = i + 1
 		time = tonumber(arg[i])
 		if not time or time < 1 then usage() end
+	elseif arg[i] == "--ssl" then ssl_params = "--ssl"
+	elseif arg[i] == "--no-ssl" then ssl_params = ""
 	end
 	i = i + 1
 end
@@ -65,9 +70,14 @@ local function test()
 	local prev_results = {rate_Mbps = 0}
 
 	for rate = start_rate, limit_rate, step_rate do
-		local cmd = downstream and
-			    string.format("%s -r -u -F -fparse -T%d -R%d %s", binary, time, rate, host) or
-			    string.format("%s -t -u -fparse -T%d -R%d %s", binary, time, rate, host)
+		local cmd
+
+		if downstream then
+			cmd = string.format("%s -r -u -F -fparse -T%d -R%d %s %s", binary, time, rate, ssl_params, host)
+		else
+			cmd = string.format("%s -t -u -fparse -T%d -R%d %s %s", binary, time, rate, ssl_params, host)
+		end
+
 		printf("%d: executing: %s\n", i, cmd)
 
 		local nattcp, msg = io.popen(cmd)
