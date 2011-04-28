@@ -1,7 +1,7 @@
 VERSION := 7.1.4
 
 CC := gcc
-CFLAGS := -Wall -O0 -g
+CFLAGS := -Wall -O
 
 override CPPFLAGS += -DUDP_FLIP -DSSL_AUTH
 override LDFLAGS += -lpolarssl
