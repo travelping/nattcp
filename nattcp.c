@@ -4901,10 +4901,8 @@ doit:
 
 #ifdef SSL_AUTH
 			if (stream_idx == 0) {
-				if (ctl_init_ssl_client(fd[stream_idx], "clntcert.pem", "clntkey.pem", "nattcp")) {
-					errno = 0;
-					err("SSL initialization or handshake failed");
-				}
+				if (ctl_init_ssl_client(fd[stream_idx], "clntcert.pem", "clntkey.pem", "nattcp"))
+					exit(1);
 			}
 #endif
 		    } else {
@@ -5139,10 +5137,8 @@ acceptnewconn:
 				/* NOTE: we're in the process dedicated to handling
 				 * the accepted connection (server)
 				 */
-				if (ctl_init_ssl_server(fd[stream_idx], "srvcert.pem", "srvkey.pem", "nattcp")) {
-					errno = 0;
-					err("SSL initialization or handshake failed");
-				}
+				if (ctl_init_ssl_server(fd[stream_idx], "srvcert.pem", "srvkey.pem", "nattcp"))
+					exit(1);
 			}
 #endif
 		    }
@@ -5168,19 +5164,15 @@ acceptnewconn:
 				if (af == AF_INET) {
 					len = sizeof(sinhim[stream_idx]);
 					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim[stream_idx], &len) != sizeof(buf) ||
-					    len != sizeof(sinhim[stream_idx])) {
-						errno = 0;
+					    len != sizeof(sinhim[stream_idx]))
 						err("error while establishing UDP data channel");
-					}
 				}
 #ifdef AF_INET6
 				else if (af == AF_INET6) {
 					len = sizeof(sinhim6[stream_idx]);
 					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0, (struct sockaddr *)&sinhim6[stream_idx], &len) != sizeof(buf) ||
-					    len != sizeof(sinhim6[stream_idx])) {
-						errno = 0;
+					    len != sizeof(sinhim6[stream_idx]))
 						err("error while establishing UDP data channel");
-					}
 				}
 #endif
 				if (strncmp(buf, "CONN", 4)) {

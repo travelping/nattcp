@@ -7,6 +7,12 @@
 #include <polarssl/certs.h>
 #include <polarssl/x509.h>
 
+#define pserror(RET, FMT, ...) do {						\
+	fprintf(stderr, "Error: " FMT ": PolarSSL code -%#x\n", ##__VA_ARGS__,	\
+		-(RET));							\
+	fflush(stderr);								\
+} while (0)
+
 static ssl_context ssl;
 static ssl_session ssn;
 
@@ -39,13 +45,13 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 
 	ret = x509parse_crtfile(&cert, (char *)cert_file);
 	if (ret != 0) {
-		/* FIXME */
+		pserror(ret, "Parsing client certificate chain \"%s\"", cert_file);
 		goto abort;
 	}
 
 	ret = x509parse_keyfile(&rsa, (char *)key_file, (char *)key_pwd);
 	if (ret != 0) {
-		/* FIXME */
+		pserror(ret, "Parsing client private key \"%s\"", key_file);
 		goto abort;
 	}
 
@@ -53,7 +59,7 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 
 	ret = ssl_init(&ssl);
 	if (ret != 0) {
-		/* FIXME: print error */
+		pserror(ret, "SSL client initialization");
 		goto abort;
 	}
 
@@ -72,12 +78,12 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 
 	while ((ret = ssl_handshake(&ssl)) != 0) {
 		if (ret != POLARSSL_ERR_NET_TRY_AGAIN) {
-			/* FIXME */
+			pserror(ret, "SSL client handshake");
 			goto abort;
 		}
 	}
 
-	//ssl_close_notify(&ssl);
+	ssl_flush_output(&ssl);
 
 abort:
 	x509_free(&cert);
@@ -104,13 +110,13 @@ ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const c
 
 	ret = x509parse_crtfile(&cert, (char *)cert_file);
 	if (ret != 0) {
-		/* FIXME */
+		pserror(ret, "Parsing server certificate chain \"%s\"", cert_file);
 		goto abort;
 	}
 
 	ret = x509parse_keyfile(&rsa, (char *)key_file, (char *)key_pwd);
 	if (ret != 0) {
-		/* FIXME */
+		pserror(ret, "Parsing server private key \"%s\"", key_file);
 		goto abort;
 	}
 
@@ -118,7 +124,7 @@ ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const c
 
 	ret = ssl_init(&ssl);
 	if (ret != 0) {
-		/* FIXME */
+		pserror(ret, "SSL server initialization");
 		goto abort;
 	}
 
@@ -139,12 +145,12 @@ ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const c
 
 	while ((ret = ssl_handshake(&ssl)) != 0) {
 		if (ret != POLARSSL_ERR_NET_TRY_AGAIN) {
-			/* FIXME */
+			pserror(ret, "SSL server handshake");
 			goto abort;
 		}
 	}
 
-	//ssl_close_notify(&ssl);
+	ssl_flush_output(&ssl);
 
 abort:
 	x509_free(&cert);
