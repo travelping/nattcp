@@ -72,7 +72,7 @@ local function test()
 
 		local nattcp, msg = io.popen(cmd)
 		if not nattcp then
-			errorf("Cannot execute \"%s\": %s", binary, msg or "(nil)")
+			errorf("Cannot execute \"%s\": %s", binary, msg)
 		end
 
 		local out = nattcp:read("*a")
