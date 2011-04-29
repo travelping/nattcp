@@ -7,6 +7,11 @@
 #include <polarssl/certs.h>
 #include <polarssl/x509.h>
 
+#ifdef BADCRL_EXPIRED /* version > 0.10.1 */
+#define ssl_set_ca_chain(SSL, CHAIN, CN) \
+	ssl_set_ca_chain(SSL, CHAIN, NULL, CN)
+#endif
+
 #define pserror(RET, FMT, ...) do {						\
 	fprintf(stderr, "Error: " FMT ": PolarSSL code -%#x\n", ##__VA_ARGS__,	\
 		-(RET));							\
