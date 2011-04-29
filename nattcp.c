@@ -5121,7 +5121,8 @@ acceptnewconn:
 				client_ipaddr.ss.ss_family = AF_INET;
 				client_ipaddr.sin.sin_addr = clientaddr;
 			    }
-			    else if (memcmp(&peer.sin_addr, &sinhim[0].sin_addr, sizeof(struct in_addr))) {
+			    else if (memcmp(&peer.sin_addr, client ? &sinhim[0].sin_addr : &clientaddr,
+			    	    	    sizeof(struct in_addr))) {
 			    	errno = 0;
 			    	err("invalid data channel peer address: possible man-in-the-middle attack");
 			    }
@@ -5166,7 +5167,8 @@ acceptnewconn:
 				client_ipaddr.ss.ss_family = AF_INET6;
 				client_ipaddr.sin6.sin6_addr = clientaddr6;
 			    }
-			    else if (memcmp(&peer.sin6_addr, &sinhim6[0].sin6_addr, sizeof(struct in6_addr))) {
+			    else if (memcmp(&peer.sin6_addr, client ? &sinhim6[0].sin6_addr : &clientaddr6,
+			    	    	    sizeof(struct in6_addr))) {
 			    	errno = 0;
 			    	err("invalid data channel peer address: possible man-in-the-middle attack");
 			    }
@@ -5215,7 +5217,8 @@ acceptnewconn:
 						err("error establishing UDP data channel");
 
 					if (addrlen != sizeof(sinhim[stream_idx]) ||
-					    memcmp(&sinhim[stream_idx].sin_addr, &sinhim[0].sin_addr, sizeof(struct in_addr))) {
+					    memcmp(&sinhim[stream_idx].sin_addr, client ? &sinhim[0].sin_addr : &clientaddr,
+					    	   sizeof(struct in_addr))) {
 						errno = 0;
 						err("invalid UDP data channel receiver address: possible man-in-the-middle attack");
 					}
@@ -5228,7 +5231,8 @@ acceptnewconn:
 						err("error establishing UDP data channel");
 
 					if (addrlen != sizeof(sinhim6[stream_idx]) ||
-					    memcmp(&sinhim6[stream_idx].sin6_addr, &sinhim6[0].sin6_addr, sizeof(struct in6_addr))) {
+					    memcmp(&sinhim6[stream_idx].sin6_addr, client ? &sinhim6[0].sin6_addr : &clientaddr6,
+					    	   sizeof(struct in6_addr))) {
 						errno = 0;
 						err("invalid UDP data channel receiver address: possible man-in-the-middle attack");
 					}
