@@ -20,7 +20,7 @@ DIST := Makefile nattcp.c polarssl.c udp-climber.lua nuttcp.8 LICENSE \
 all : $(MANIFEST)
 
 nattcp$(EXEEXT) : nattcp.o polarssl.o
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) -o $@ $^ $(LDFLAGS)
 
 udp-climber : udp-climber.lua
 	echo "#!/usr/bin/lua" >$@
