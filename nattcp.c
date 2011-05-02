@@ -5220,7 +5220,15 @@ acceptnewconn:
 				char buf[4];
 				socklen_t addrlen;
 
-				/* FIXME: recvfrom timeout; error handling? */
+				pollfds[0].fd = fd[stream_idx];
+				pollfds[0].events = POLLIN;
+				pollfds[0].revents = 0;
+
+				errno = 0;
+				if (poll(pollfds, 1, ACCEPT_TIMEOUT*1000) < 1 ||
+				    !(pollfds[0].revents & POLLIN))
+					err("timeout/error establishing UDP data channel");
+
 				if (af == AF_INET) {
 					addrlen = sizeof(sinhim[stream_idx]);
 					if (recvfrom(fd[stream_idx], buf, sizeof(buf), 0,
