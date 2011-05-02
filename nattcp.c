@@ -816,7 +816,7 @@ void print_tcpinfo();
 /*
  * SSL handshake interface, provided by library-specific compilation units
  */
-int ctl_init_ssl_client(int, const char *, const char *, const char *);
+int ctl_init_ssl_client(int, const char *, const char *, const char *, const char *);
 int ctl_init_ssl_server(int, const char *, const char *, const char *);
 
 #define DEFAULT_SSL_CERT	"cert.pem"
@@ -4937,7 +4937,7 @@ doit:
 
 #ifdef SSL_AUTH
 			if (stream_idx == 0 && ssl_enabled) {
-				if (ctl_init_ssl_client(fd[stream_idx], ssl_cert, ssl_key, NULL))
+				if (ctl_init_ssl_client(fd[stream_idx], ssl_cert, ssl_key, NULL, host))
 					exit(1);
 			}
 #endif

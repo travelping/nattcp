@@ -34,7 +34,8 @@ static const char *my_dhm_P =
 static const char *my_dhm_G = "4";
 
 int
-ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const char *key_pwd)
+ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const char *key_pwd,
+		    const char *server_cn)
 {
 	havege_state hs;
 
@@ -69,7 +70,7 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 	}
 
 	ssl_set_endpoint(&ssl, SSL_IS_CLIENT);
-	ssl_set_authmode(&ssl, SSL_VERIFY_NONE);
+	ssl_set_authmode(&ssl, SSL_VERIFY_REQUIRED);
 
 	ssl_set_rng(&ssl, havege_rand, &hs);
 	ssl_set_bio(&ssl, net_recv, &fd, net_send, &fd);
@@ -79,7 +80,7 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 
 	ssl_set_own_cert(&ssl, &cert, &rsa);
 	if (cert.next)
-		ssl_set_ca_chain(&ssl, cert.next, NULL);
+		ssl_set_ca_chain(&ssl, cert.next, (char *)server_cn);
 
 	while ((ret = ssl_handshake(&ssl)) != 0) {
 		if (ret != POLARSSL_ERR_NET_TRY_AGAIN) {
