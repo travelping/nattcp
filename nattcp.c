@@ -816,8 +816,10 @@ void print_tcpinfo();
 /*
  * SSL handshake interface, provided by library-specific compilation units
  */
-int ctl_init_ssl_client(int, const char *, const char *, const char *, const char *);
-int ctl_init_ssl_server(int, const char *, const char *, const char *);
+int ctl_init_ssl_client(int, const char *, const char *, const char *,
+			const char *, const char *);
+int ctl_init_ssl_server(int, const char *, const char *, const char *,
+			const char *);
 
 #define DEFAULT_SSL_CERT	"cert.pem"
 #define DEFAULT_SSL_KEY		"key.pem"
@@ -825,6 +827,7 @@ int ctl_init_ssl_server(int, const char *, const char *, const char *);
 int ssl_enabled = 0;
 const char *ssl_cert = DEFAULT_SSL_CERT;
 const char *ssl_key = DEFAULT_SSL_KEY;
+const char *ssl_ca = NULL; /* default: chain from ssl_cert */
 #endif
 
 int vers_major = 7;
@@ -1194,11 +1197,13 @@ Format options:\n\
 "SSL options:\n"
 "	--ssl		Enforce SSL authentication of the control channel\n"
 "	--ssl-cert <certificate>  (default: " DEFAULT_SSL_CERT ")\n"
-"			PEM-encoded client/server certificate chain. The included\n"
-"			CA-chain will also be used to authenticate the peer certificate.\n"
+"			PEM-encoded client/server certificate chain.\n"
 "			Implies --ssl\n"
 "	--ssl-key <key>  (default: " DEFAULT_SSL_KEY ")\n"
 "			PEM/DER-encoded RSA private key. It must not be password-encrypted.\n"
+"			Implies --ssl\n"
+"	--ssl-ca <CA-certififcate-chain>  (default: CA-chain from <certificate>)\n"
+"			PEM-encoded CA certificate chain to verifiy the peer certificate.\n"
 "			Implies --ssl\n"
 #endif
 ;
@@ -2451,6 +2456,12 @@ main( int argc, char **argv )
 			else if (strcmp(&argv[0][2], "ssl-key") == 0) {
 				ssl_enabled = 1;
 				ssl_key = argv[1];
+				argv++;
+				argc--;
+			}
+			else if (strcmp(&argv[0][2], "ssl-ca") == 0) {
+				ssl_enabled = 1;
+				ssl_ca = argv[1];
 				argv++;
 				argc--;
 			}
@@ -4937,7 +4948,7 @@ doit:
 
 #ifdef SSL_AUTH
 			if (stream_idx == 0 && ssl_enabled) {
-				if (ctl_init_ssl_client(fd[stream_idx], ssl_cert, ssl_key, NULL, host))
+				if (ctl_init_ssl_client(fd[stream_idx], ssl_cert, ssl_key, NULL, ssl_ca, host))
 					exit(1);
 			}
 #endif
@@ -5183,7 +5194,7 @@ acceptnewconn:
 				/* NOTE: we're in the process dedicated to handling
 				 * the accepted connection (server)
 				 */
-				if (ctl_init_ssl_server(fd[stream_idx], ssl_cert, ssl_key, NULL))
+				if (ctl_init_ssl_server(fd[stream_idx], ssl_cert, ssl_key, NULL, ssl_ca))
 					exit(1);
 			}
 #endif

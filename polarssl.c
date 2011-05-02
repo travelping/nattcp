@@ -35,11 +35,13 @@ static const char *my_dhm_G = "4";
 
 int
 ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const char *key_pwd,
-		    const char *server_cn)
+		    const char *ca_file, const char *server_cn)
 {
 	havege_state hs;
 
 	x509_cert cert;
+	x509_cert cachain;
+	x509_cert *pca;
 	rsa_context rsa;
 
 	int ret = 0;
@@ -47,6 +49,7 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 	memset(&ssl, 0, sizeof(ssl_context));
 	memset(&ssn, 0, sizeof(ssl_session));
 	memset(&cert, 0, sizeof(x509_cert));
+	memset(&cachain, 0, sizeof(x509_cert));
 	memset(&rsa, 0, sizeof(rsa_context));
 
 	ret = x509parse_crtfile(&cert, (char *)cert_file);
@@ -54,10 +57,25 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 		pserror(ret, "Parsing client certificate chain \"%s\"", cert_file);
 		goto abort;
 	}
+	pca = cert.next;
 
 	ret = x509parse_keyfile(&rsa, (char *)key_file, (char *)key_pwd);
 	if (ret != 0) {
 		pserror(ret, "Parsing client private key \"%s\"", key_file);
+		goto abort;
+	}
+
+	if (ca_file) {
+		ret = x509parse_crtfile(&cachain, (char *)ca_file);
+		if (ret != 0) {
+			pserror(ret, "Parsing CA certificate chain \"%s\"", ca_file);
+			goto abort;
+		}
+		pca = &cachain;
+	}
+	if (pca == NULL) {
+		fprintf(stderr, "Error: No CA certificate chain available\n");
+		fflush(stderr);
 		goto abort;
 	}
 
@@ -79,8 +97,7 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 	ssl_set_ciphers(&ssl, ssl_default_ciphers);
 
 	ssl_set_own_cert(&ssl, &cert, &rsa);
-	if (cert.next)
-		ssl_set_ca_chain(&ssl, cert.next, (char *)server_cn);
+	ssl_set_ca_chain(&ssl, pca, (char *)server_cn);
 
 	while ((ret = ssl_handshake(&ssl)) != 0) {
 		if (ret != POLARSSL_ERR_NET_TRY_AGAIN) {
@@ -92,6 +109,7 @@ ctl_init_ssl_client(int fd, const char *cert_file, const char *key_file, const c
 	ssl_flush_output(&ssl);
 
 abort:
+	x509_free(&cachain);
 	x509_free(&cert);
 	rsa_free(&rsa);
 	ssl_free(&ssl);
@@ -100,11 +118,14 @@ abort:
 }
 
 int
-ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const char *key_pwd)
+ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const char *key_pwd,
+		    const char *ca_file)
 {
 	havege_state hs;
 
 	x509_cert cert;
+	x509_cert cachain;
+	x509_cert *pca;
 	rsa_context rsa;
 
 	int ret = 0;
@@ -112,6 +133,7 @@ ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const c
 	memset(&ssl, 0, sizeof(ssl_context));
 	memset(&ssn, 0, sizeof(ssl_session));
 	memset(&cert, 0, sizeof(x509_cert));
+	memset(&cachain, 0, sizeof(x509_cert));
 	memset(&rsa, 0, sizeof(rsa_context));
 
 	ret = x509parse_crtfile(&cert, (char *)cert_file);
@@ -119,10 +141,25 @@ ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const c
 		pserror(ret, "Parsing server certificate chain \"%s\"", cert_file);
 		goto abort;
 	}
+	pca = cert.next;
 
 	ret = x509parse_keyfile(&rsa, (char *)key_file, (char *)key_pwd);
 	if (ret != 0) {
 		pserror(ret, "Parsing server private key \"%s\"", key_file);
+		goto abort;
+	}
+
+	if (ca_file) {
+		ret = x509parse_crtfile(&cachain, (char *)ca_file);
+		if (ret != 0) {
+			pserror(ret, "Parsing CA certificate chain \"%s\"", ca_file);
+			goto abort;
+		}
+		pca = &cachain;
+	}
+	if (pca == NULL) {
+		fprintf(stderr, "Error: No CA certificate chain available\n");
+		fflush(stderr);
 		goto abort;
 	}
 
@@ -144,8 +181,7 @@ ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const c
 	ssl_set_ciphers(&ssl, ssl_default_ciphers);
 
 	ssl_set_own_cert(&ssl, &cert, &rsa);
-	if (cert.next)
-		ssl_set_ca_chain(&ssl, cert.next, NULL);
+	ssl_set_ca_chain(&ssl, pca, NULL);
 
 	ssl_set_dh_param(&ssl, (char *)my_dhm_P, (char *)my_dhm_G);
 
@@ -159,6 +195,7 @@ ctl_init_ssl_server(int fd, const char *cert_file, const char *key_file, const c
 	ssl_flush_output(&ssl);
 
 abort:
+	x509_free(&cachain);
 	x509_free(&cert);
 	rsa_free(&rsa);
 	ssl_free(&ssl);
