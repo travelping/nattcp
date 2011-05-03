@@ -1,4 +1,31 @@
-nattcp (7.1.4-1ppa1~maverick1) maverick; urgency=low
+nattcp (7.1.5-1ppa1~lucid1) lucid; urgency=low
+
+  * new upstream release
+
+  * optional client/server SSL authentication of the control channel
+    SSL handshake is performed on the control channel, remaining exchange
+    is not encrypted. Data channels are "secured" against man-in-the-middle attacks
+    by checking the peer adress on the connection-accepting side against the
+    authenticated control channel peer address.
+  * if a server runs in SSL-mode, every client must do so as well
+    Client certificates are verified, but their CN is not checked.
+    Server certificates are verified and their CN is checked against
+    the host given on the command line.
+  * xinetd mode will and cannot work in SSL mode
+    Data channel addresses cannot be checked against the control channel
+    address in xinetd mode since the super-server accepts the connection.
+    Also (x)inetd support is probably completely broken currently.
+  * PolarSSL v0.10.1 and v0.12.1 are supported as SSL backends
+
+  * UDP "connection" establishment timeout
+    In UDP/flip mode the primitive connection establishment mechanism
+    is improved by a timeout to prevent hanging server processes.
+
+  * documented github "homepage"
+
+ -- Robin Haberkorn <robin.haberkorn@googlemail.com>  Tue, 03 May 2011 17:17:27 +0200
+
+nattcp (7.1.4-1ppa1~lucid1) lucid; urgency=low
 
   * initial debian package based on nuttcp (6.1.2-3)
 

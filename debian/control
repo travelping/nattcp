@@ -2,8 +2,9 @@ Source: nattcp
 Section: net
 Priority: extra
 Maintainer: Robin Haberkorn <robin.haberkorn@googlemail.com>
-Build-Depends: debhelper (>= 7), lua5.1
+Build-Depends: debhelper (>= 7), libpolarssl-dev, lua5.1
 Standards-Version: 3.9.1
+Homepage: https://github.com/travelping/nattcp
 
 Package: nattcp
 Architecture: any
@@ -16,4 +17,5 @@ Description: network performance measurement tool
  data for a specified time interval, or alternatively transferring a specified
  number of bytes.
  It is a fork of nuttcp, initially to be better suited in environments
- where the client is behind a NAT gateway.
+ where the client is behind a NAT gateway. It also supports public key
+ authentication of the control channel via SSL.
