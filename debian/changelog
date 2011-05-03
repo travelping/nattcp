@@ -4,9 +4,9 @@ nattcp (7.1.5-1ppa1~lucid1) lucid; urgency=low
 
   * optional client/server SSL authentication of the control channel
     SSL handshake is performed on the control channel, remaining exchange
-    is not encrypted. Data channels are "secured" against man-in-the-middle attacks
-    by checking the peer adress on the connection-accepting side against the
-    authenticated control channel peer address.
+    is not encrypted. Data channels are "secured" against man-in-the-middle
+    attacks by checking the peer address on the connection-accepting side
+    against the authenticated control channel peer address.
   * if a server runs in SSL-mode, every client must do so as well
     Client certificates are verified, but their CN is not checked.
     Server certificates are verified and their CN is checked against
