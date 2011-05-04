@@ -1,3 +1,4 @@
 xinetd.d/nattcp
 xinetd.d/nattcp4
 xinetd.d/nattcp6
+upstart/nattcp.conf

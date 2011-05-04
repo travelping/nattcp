@@ -15,7 +15,8 @@ LUACFLAGS := -s
 
 MANIFEST := nattcp$(EXEEXT) udp-climber
 DIST := Makefile nattcp.c polarssl.c udp-climber.lua nuttcp.8 LICENSE \
-	xinetd.d/nattcp xinetd.d/nattcp4 xinetd.d/nattcp6
+	xinetd.d/nattcp xinetd.d/nattcp4 xinetd.d/nattcp6 \
+	upstart/nattcp.conf
 
 all : $(MANIFEST)
 
