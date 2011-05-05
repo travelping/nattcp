@@ -490,6 +490,7 @@ static char RCSid[] = "@(#)$Revision: 1.2 $ (BRL)";
 #include <arpa/inet.h>
 #include <netdb.h>
 #include <sys/resource.h>
+#include <pwd.h>
 #else
 #include "win32nuttcp.h"			/* from win32 */
 #endif /* _WIN32 */
@@ -1172,6 +1173,10 @@ Usage (server): nattcp -S[P] [-options]\n\
 #ifdef IPV6_V6ONLY
 "	--disable-v4-mapped disable v4 mapping in v6 server (default)\n"
 "	--enable-v4-mapped enable v4 mapping in v6 server\n"
+#endif
+#ifndef _WIN32
+"	--su <user>	run with effective user/group IDs of <user>. if started\n"
+"			as root, all user/group IDs of the process are changed.\n"
 #endif
 "\n\
 Multilink aggregation options (TCP only):\n\
@@ -2462,6 +2467,26 @@ main( int argc, char **argv )
 			else if (strcmp(&argv[0][2], "ssl-ca") == 0) {
 				ssl_enabled = 1;
 				ssl_ca = argv[1];
+				argv++;
+				argc--;
+			}
+#endif
+#ifndef _WIN32
+			else if (strcmp(&argv[0][2], "su") == 0) {
+				struct passwd *pwd;
+
+				if (argc < 2)
+					goto usage;
+
+				pwd = getpwnam(argv[1]);
+				if (pwd == NULL ||
+				    setgid(pwd->pw_gid) ||
+				    setuid(pwd->pw_uid)) {
+					fprintf(stderr, "couldn't set user/group IDs to user \"%s\"\n", argv[1]);
+					fflush(stderr);
+					exit(1);
+				}
+
 				argv++;
 				argc--;
 			}
