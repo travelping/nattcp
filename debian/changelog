@@ -1,3 +1,16 @@
+nattcp (7.1.6-1ppa1~lucid1) lucid; urgency=low
+
+  * new upstream release
+
+  * new "--su" option for changing the user/group IDs of the nattcp
+    main process
+  * working upstart config, to run/supervise nattcp securely.
+    it defaults to running it as user "nattcp" (should be a system
+    user). SSL certificate/key is expected to be in nattcp's home
+    directory.
+
+ -- Robin Haberkorn <robin.haberkorn@googlemail.com>  Thu, 05 May 2011 18:27:13 +0200
+
 nattcp (7.1.5-1ppa1~lucid1) lucid; urgency=low
 
   * new upstream release

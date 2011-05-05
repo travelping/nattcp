@@ -1,5 +1,5 @@
 /*
- *	N A T T C P . C						v7.1.5
+ *	N A T T C P . C						v7.1.6
  *
  * Copyright(c) 2000 - 2010 Bill Fink.  All rights reserved.
  * Copyright(c) 2003 - 2010 Rob Scott.  All rights reserved.
@@ -833,7 +833,7 @@ const char *ssl_ca = NULL; /* default: chain from ssl_cert */
 
 int vers_major = 7;
 int vers_minor = 1;
-int vers_delta = 5;
+int vers_delta = 6;
 int ivers;
 int rvers_major = 0;
 int rvers_minor = 0;

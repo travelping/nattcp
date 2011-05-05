@@ -1,4 +1,4 @@
-VERSION := 7.1.5
+VERSION := 7.1.6
 
 CC := gcc
 CFLAGS := -Wall -O
