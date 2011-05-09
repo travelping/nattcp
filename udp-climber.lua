@@ -38,7 +38,7 @@ if #arg < 1 or host:sub(1, 1) == "-" then usage() end
 
 -- parse command line
 local i = 1
-while i < #arg-1 do
+while i < #arg do
 	if arg[i] == "-h" then usage(0)
 	elseif arg[i] == "-D" then downstream = true
 	elseif arg[i] == "-U" then downstream = false
@@ -60,6 +60,8 @@ while i < #arg-1 do
 		if not time or time < 1 then usage() end
 	elseif arg[i] == "--ssl" then ssl_params = "--ssl"
 	elseif arg[i] == "--no-ssl" then ssl_params = ""
+	else
+		usage()
 	end
 	i = i + 1
 end
