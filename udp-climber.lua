@@ -97,6 +97,10 @@ local function test()
 		for key, value in out:gmatch("([%w_]+)=([%d.]+)") do
 			results[key] = tonumber(value)
 		end
+		if not results.rate_Mbps or
+		   not results.data_loss then
+			errorf("Invalid results while executing \"%s\": %s", binary, out)
+		end
 
 		printf("%d: rx rate = %fmbps, loss = %d%%\n", i,
 		       results.rate_Mbps, results.data_loss)
